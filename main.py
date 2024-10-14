@@ -40,7 +40,6 @@ class PhotoFromVK:
             response = requests.get(self.URL, params=params)
             info_photos_from_vk = response.json()
             response.raise_for_status()
-            print(response.json())
             if "error" in info_photos_from_vk:
                 raise ValueError(f"Ошибка в получении данных из 'Вконтакте',"
                                  f" нужно проверить входные данные.")
@@ -109,13 +108,15 @@ class PhotoFromVK:
             info_photos_for_yandex = self.__get_data()
             list_likes = []
             for info_photo in tqdm(info_photos_for_yandex, desc="Идёт обработка фотографий... ", unit=" фото"):
+                extension = info_photo["url_photo"].split("?")[0].split(".")[-1]
                 if info_photo["count_likes"] not in list_likes:
                     list_likes.append(info_photo["count_likes"])
-                    info_photo["file_name"] = str(info_photo["count_likes"])
+                    info_photo["file_name"] = str(info_photo["count_likes"]) + "." + extension
                     del info_photo["count_likes"]
                     del info_photo["format_date"]
                 else:
-                    info_photo["file_name"] = str(info_photo["count_likes"]) + '_' + info_photo["format_date"]
+                    info_photo["file_name"] = str(info_photo["count_likes"]) + '_'\
+                                              + info_photo["format_date"] + "." + extension
                     del info_photo["count_likes"]
                     del info_photo["format_date"]
             return info_photos_for_yandex
@@ -233,6 +234,6 @@ if __name__ == '__main__':
         photo_from_vk.get_json_file()
         data_for_ya = photo_from_vk.get_info_photos_for_yandex()
         photo_in_ya = PhotoInYandex(token=token_ya, info_photos=data_for_ya)
-        photo_in_ya.download_photo_on_yandex(name_folder_yandex="Image")
+        photo_in_ya.download_photo_on_yandex(name_folder_yandex="Images")
     except ValueError as ex:
         print(f"Введите корректные данные: {ex}")
